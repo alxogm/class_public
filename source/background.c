@@ -436,11 +436,22 @@ int background_functions(
 
   /* cdm */
   if (pba->has_cdm == _TRUE_) {
+    
     pvecback[pba->index_bg_rho_cdm] = pba->Omega0_cdm * pow(pba->H0,2) / pow(a,3);
     rho_tot += pvecback[pba->index_bg_rho_cdm];
     p_tot += 0.;
     rho_m += pvecback[pba->index_bg_rho_cdm];
   }
+
+/* AXGM cfld*/
+  if (pba->has_cfld == _TRUE_) {
+      pvecback[pba->index_bg_rho_cfld] = pba->Omega0_cfld * pow(pba->H0,2) / pow(a,2);
+      rho_tot += pvecback[pba->index_bg_rho_cfld];
+      p_tot += - (1/3.) * pvecback[pba->index_bg_rho_cfld] ;
+      dp_dloga += (2./3.) * pvecback[pba->index_bg_rho_cfld];
+      rho_m += pvecback[pba->index_bg_rho_cfld];
+  }
+
 
   /* idm */
   if (pba->has_idm == _TRUE_) {
@@ -972,6 +983,7 @@ int background_indices(
   /** - initialize all flags: which species are present? */
 
   pba->has_cdm = _FALSE_;
+  pba->has_cfld = _FALSE_;
   pba->has_idm = _FALSE_;
   pba->has_ncdm = _FALSE_;
   pba->has_dcdm = _FALSE_;
@@ -986,6 +998,9 @@ int background_indices(
 
   if (pba->Omega0_cdm != 0.)
     pba->has_cdm = _TRUE_;
+//AXGM   
+  if (pba->Omega0_cfld != 0.)
+    pba->has_cfld = _TRUE_;
 
   if (pba->Omega0_idm != 0.)
     pba->has_idm = _TRUE_;
@@ -1136,7 +1151,10 @@ int background_indices(
 
   /* -> varying fundamental constant -- me (effective electron mass) */
   class_define_index(pba->index_bg_varc_me,pba->has_varconst,index_bg,1);
-
+  
+/*AXGM - index for rho_cfld */
+  class_define_index(pba->index_bg_rho_cfld,pba->has_cfld,index_bg,1);
+  
   /* -> put here additional quantities describing background */
   /*    */
   /*    */
@@ -1183,6 +1201,7 @@ int background_indices(
 
   /* -> end of indices in the vector of variables to integrate */
   pba->bi_size = index_bi;
+
 
   return _SUCCESS_;
 
@@ -2437,6 +2456,7 @@ int background_output_titles(
   class_store_columntitle(titles,"(.)rho_g",_TRUE_);
   class_store_columntitle(titles,"(.)rho_b",_TRUE_);
   class_store_columntitle(titles,"(.)rho_cdm",pba->has_cdm);
+  
   class_store_columntitle(titles,"(.)rho_idm",pba->has_idm);
   if (pba->has_ncdm == _TRUE_) {
     for (n=0; n<pba->N_ncdm; n++) {
@@ -2473,6 +2493,7 @@ int background_output_titles(
 
   class_store_columntitle(titles,"rel. alpha",pba->has_varconst);
   class_store_columntitle(titles,"rel. m_e",pba->has_varconst);
+  class_store_columntitle(titles,"(.)rho_cfld",pba->has_cdm);
 
   return _SUCCESS_;
 }
@@ -2512,6 +2533,7 @@ int background_output_data(
     class_store_double(dataptr,pvecback[pba->index_bg_rho_g],_TRUE_,storeidx);
     class_store_double(dataptr,pvecback[pba->index_bg_rho_b],_TRUE_,storeidx);
     class_store_double(dataptr,pvecback[pba->index_bg_rho_cdm],pba->has_cdm,storeidx);
+    class_store_double(dataptr,pvecback[pba->index_bg_rho_cfld],pba->has_cfld,storeidx);
     class_store_double(dataptr,pvecback[pba->index_bg_rho_idm],pba->has_idm,storeidx);
     if (pba->has_ncdm == _TRUE_) {
       for (n=0; n<pba->N_ncdm; n++) {
@@ -2629,6 +2651,11 @@ int background_derivs(
   if (pba->has_cdm == _TRUE_) {
     rho_M += pvecback[pba->index_bg_rho_cdm];
   }
+//AXGM
+  if (pba->has_cfld == _TRUE_) {
+    rho_M += pvecback[pba->index_bg_rho_cfld];
+  }
+  
   if (pba->has_idm == _TRUE_){
     rho_M += pvecback[pba->index_bg_rho_idm];
   }
@@ -2799,6 +2826,11 @@ int background_output_budget(
       class_print_species("Cold Dark Matter",cdm);
       budget_matter+=pba->Omega0_cdm;
     }
+    if (pba->has_cfld == _TRUE_) {
+      class_print_species("Curvature Fluid",cfld);
+      budget_matter+=pba->Omega0_cfld;
+    }
+    
     if (pba->has_idm == _TRUE_){
       class_print_species("Interacting DM - idr,b,g",idm);
       budget_matter+=pba->Omega0_idm;

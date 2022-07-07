@@ -2464,7 +2464,30 @@ int input_read_parameters_species(struct file_content * pfc,
     has_cdm_userdefined = _TRUE_;
   }
   class_test(pba->Omega0_cdm<0,errmsg, "You cannot set the cold dark matter density to negative values.");
-
+    
+//AXGM
+/* Read */
+  class_call(parser_read_double(pfc,"Omega_cfld",&param1,&flag1,errmsg),
+             errmsg,
+             errmsg);
+  class_call(parser_read_double(pfc,"omega_cfld",&param2,&flag2,errmsg),
+             errmsg,
+             errmsg);
+  /* Test */
+  class_test(((flag1 == _TRUE_) && (flag2 == _TRUE_)),
+             errmsg,
+             "You can only enter one of 'Omega_cfld' or 'omega_cfld'.");
+  /* Complete set of parameters */
+  if (flag1 == _TRUE_){
+    pba->Omega0_cfld = param1;
+    has_cdm_userdefined = _TRUE_;
+  }
+  if (flag2 == _TRUE_){
+    pba->Omega0_cfld = param2/pba->h/pba->h;
+    has_cdm_userdefined = _TRUE_;
+  }
+//AXGM
+    
   /** 4) (Second part) Omega_0_m (total non-relativistic) */
   class_call(parser_read_double(pfc,"Omega_m",&param1,&flag1,errmsg),
              errmsg,
@@ -3162,6 +3185,7 @@ int input_read_parameters_species(struct file_content * pfc,
   Omega_tot += pba->Omega0_b;
   Omega_tot += pba->Omega0_ur;
   Omega_tot += pba->Omega0_cdm;
+  Omega_tot += pba->Omega0_cfld;
   Omega_tot += pba->Omega0_idm;
   Omega_tot += pba->Omega0_dcdmdr;
   Omega_tot += pba->Omega0_idr;

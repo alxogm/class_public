@@ -2533,7 +2533,6 @@ int background_output_data(
     class_store_double(dataptr,pvecback[pba->index_bg_rho_g],_TRUE_,storeidx);
     class_store_double(dataptr,pvecback[pba->index_bg_rho_b],_TRUE_,storeidx);
     class_store_double(dataptr,pvecback[pba->index_bg_rho_cdm],pba->has_cdm,storeidx);
-    class_store_double(dataptr,pvecback[pba->index_bg_rho_cfld],pba->has_cfld,storeidx);
     class_store_double(dataptr,pvecback[pba->index_bg_rho_idm],pba->has_idm,storeidx);
     if (pba->has_ncdm == _TRUE_) {
       for (n=0; n<pba->N_ncdm; n++) {
@@ -2568,6 +2567,7 @@ int background_output_data(
 
     class_store_double(dataptr,pvecback[pba->index_bg_varc_alpha],pba->has_varconst,storeidx);
     class_store_double(dataptr,pvecback[pba->index_bg_varc_me],pba->has_varconst,storeidx);
+    class_store_double(dataptr,pvecback[pba->index_bg_rho_cfld],pba->has_cfld,storeidx);
   }
 
   return _SUCCESS_;
